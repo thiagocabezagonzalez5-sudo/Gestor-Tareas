@@ -1,0 +1,8 @@
+*.exe
+*.o
+*.obj
+*.out
+*.tmp
+*.bak
+*.log
+Usuarios/
