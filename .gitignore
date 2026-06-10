@@ -2,7 +2,16 @@
 *.o
 *.obj
 *.out
+*.tds
+*.ilk
+*.map
 *.tmp
 *.bak
 *.log
+*.zip
+__history/
+Win32/
+Win64/
+Debug/
+Release/
 Usuarios/
