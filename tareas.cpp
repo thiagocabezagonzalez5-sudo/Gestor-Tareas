@@ -11,6 +11,9 @@
 
 std::vector<Tarea> tareas;
 
+int seleccionarTareaPaginada(const std::string& titulo, const std::string& accion);
+void mostrarDetalleTarea(const Tarea& t);
+
 int generarNuevoId(){
     int mayorId = 0;
 
@@ -127,10 +130,15 @@ void agregarTareaInteractiva(){
     do{
         mostrarFormularioAgregarTarea(nombre, descripcion, fecha, importanciaTexto, error);
 
-        int importancia = leerEntero("Ingrese la importancia [1-5]: ", 1, 5);
-        importanciaTexto = std::to_string(importancia);
+        int importancia = leerOpcionUnDigito("Ingrese la importancia [1-5]: ", 1, 5);
 
-        error = "";
+        if(importancia == -1){
+            error = "Importancia invalida. Use un solo digito del 1 al 5.";
+            importanciaTexto = "";
+        }else{
+            importanciaTexto = std::to_string(importancia);
+            error = "";
+        }
 
     }while(error != "");
 
@@ -207,6 +215,7 @@ void mostrarTareasPaginadas(int paginaActual, int tareasPorPagina){
 void verTareas(){
     int tecla;
     bool volver = false;
+    std::string error = "";
 
     int paginaActual = 0;
     int tareasPorPagina = 5;
@@ -232,6 +241,11 @@ void verTareas(){
         mostrarTareasPaginadas(paginaActual, tareasPorPagina);
         mostrarOpcionesVerTareas();
 
+        if(error != ""){
+            escribirColor(ROJO, "\n" + error + "\n");
+        }
+
+        std::cout << "\nOpcion: ";
         tecla = _getch();
 
         switch(tecla){
@@ -239,6 +253,9 @@ void verTareas(){
             case 'N':
                 if(paginaActual < totalPaginas - 1){
                     paginaActual++;
+                    error = "";
+                }else{
+                    error = "Ya esta en la ultima pagina.";
                 }
                 break;
 
@@ -246,31 +263,39 @@ void verTareas(){
             case 'P':
                 if(paginaActual > 0){
                     paginaActual--;
+                    error = "";
+                }else{
+                    error = "Ya esta en la primera pagina.";
                 }
                 break;
 
             case '1':
                 ordenar(1);
                 paginaActual = 0;
+                error = "";
                 break;
 
             case '2':
                 ordenar(2);
                 paginaActual = 0;
+                error = "";
                 break;
 
             case '3':
                 ordenar(3);
                 paginaActual = 0;
+                error = "";
                 break;
 
             case '4':
                 ordenar(4);
                 paginaActual = 0;
+                error = "";
                 break;
 
             case 'd':
             case 'D':
+                error = "";
                 pedirDetalleTarea();
                 break;
 
@@ -279,8 +304,7 @@ void verTareas(){
                 break;
 
             default:
-                std::cout << "\nOpcion invalida.\n";
-                pausar();
+                error = "Opcion invalida. Use N, P, D, ESC o 1-4 para ordenar.";
                 break;
         }
 
@@ -288,27 +312,16 @@ void verTareas(){
 }
 
 void pedirDetalleTarea(){
-    if(tareas.empty()){
-        std::cout << "\nNo hay tareas para mostrar.\n";
-        pausar();
-        return;
-    }
+    int indice = seleccionarTareaPaginada("VER DETALLE DE TAREA", "ver en detalle");
 
-    limpiarPantalla();
-
-    int id = leerEntero("Ingrese el ID de la tarea que quiere ver en detalle: ", 1, 999999);
-    int indice = buscarIndicePorId(id);
-
-    if(indice == -1){
-        std::cout << "\nNo existe una tarea con ese ID.\n";
-        pausar();
-    }else{
+    if(indice != -1){
         mostrarDetalleTarea(tareas[indice]);
     }
 }
 
 void mostrarDetalleTarea(const Tarea& t){
     int tecla;
+    std::string error = "";
 
     do{
         limpiarPantalla();
@@ -326,9 +339,16 @@ void mostrarDetalleTarea(const Tarea& t){
 
         linea(2);
 
-        std::cout << "\n[ESC] Volver a la lista";
+        if(error != ""){
+            escribirColor(ROJO, "\n" + error + "\n");
+        }
 
+        std::cout << "\n[ESC] Volver a la lista";
         tecla = _getch();
+
+        if(tecla != 27){
+            error = "Opcion invalida. Presione ESC para volver.";
+        }
 
     }while(tecla != 27);
 }
@@ -337,6 +357,7 @@ int seleccionarTareaPaginada(const std::string& titulo, const std::string& accio
     int paginaActual = 0;
     int tareasPorPagina = 5;
     bool salir = false;
+    std::string error = "";
 
     if(tareas.empty()){
         limpiarPantalla();
@@ -368,7 +389,7 @@ int seleccionarTareaPaginada(const std::string& titulo, const std::string& accio
         centrarTexto("Pagina " + std::to_string(paginaActual + 1) + " de " + std::to_string(totalPaginas));
         lineaTabla(1);
 
-        filaTabla("ID", "NOMBRE", "DESCRIPCION", "IMPOR", "ENTREGA", "ESTADO");
+        filaTabla("NRO", "NOMBRE", "DESCRIPCION", "IMPOR", "ENTREGA", "ESTADO");
         lineaTabla(0);
 
         int inicio = paginaActual * tareasPorPagina;
@@ -378,9 +399,13 @@ int seleccionarTareaPaginada(const std::string& titulo, const std::string& accio
             fin = totalTareas;
         }
 
+        int cantidadVisible = fin - inicio;
+
         for(int i = inicio; i < fin; i++){
+            int numeroVisible = i - inicio + 1;
+
             filaTabla(
-                std::to_string(tareas[i].id),
+                std::to_string(numeroVisible),
                 tareas[i].nombre,
                 tareas[i].descripcion,
                 mostrarEstrellas(tareas[i].importancia),
@@ -398,37 +423,42 @@ int seleccionarTareaPaginada(const std::string& titulo, const std::string& accio
         linea(2);
 
         std::cout << "\n[N] Siguiente pagina   [P] Pagina anterior   [ESC] Volver";
-        std::cout << "\nIngrese el ID de la tarea a " << accion << ": ";
 
-        std::string entrada = leerTexto("");
+        if(error != ""){
+            escribirColor(ROJO, "\n" + error + "\n");
+        }
 
-        if(entrada == "n" || entrada == "N"){
+        std::cout << "\nElija una tarea [1-" << cantidadVisible << "] para " << accion << ": ";
+
+        int tecla = _getch();
+
+        if(tecla == 'n' || tecla == 'N'){
             if(paginaActual < totalPaginas - 1){
                 paginaActual++;
+                error = "";
+            }else{
+                error = "Ya esta en la ultima pagina.";
             }
-        }else if(entrada == "p" || entrada == "P"){
+        }else if(tecla == 'p' || tecla == 'P'){
             if(paginaActual > 0){
                 paginaActual--;
-            }
-        }else if(entrada == "esc" || entrada == "ESC"){
-            salir = true;
-        }else{
-            int id = 0;
-
-            try{
-                id = std::stoi(entrada);
-            }catch(...){
-                id = 0;
-            }
-
-            int indice = buscarIndicePorId(id);
-
-            if(indice == -1){
-                escribirColor(ROJO, "\nNo existe una tarea con ese ID.\n");
-                pausar();
+                error = "";
             }else{
-                return indice;
+                error = "Ya esta en la primera pagina.";
             }
+        }else if(tecla == 27){
+            salir = true;
+        }else if(tecla >= '1' && tecla <= '9'){
+            int numeroVisible = tecla - '0';
+
+            if(numeroVisible >= 1 && numeroVisible <= cantidadVisible){
+                std::cout << char(tecla) << std::endl;
+                return inicio + numeroVisible - 1;
+            }else{
+                error = "Opcion invalida. Elija una tarea visible con un solo digito.";
+            }
+        }else{
+            error = "Opcion invalida. Use N, P, ESC o el numero visible de la tarea.";
         }
 
     }while(!salir);
@@ -444,6 +474,7 @@ void modificarTarea(){
     }
 
     bool salir = false;
+    std::string error = "";
 
     do{
         limpiarPantalla();
@@ -466,7 +497,18 @@ void modificarTarea(){
         textoIzquierda("[0] Volver");
         linea(2);
 
-        int opcion = leerEntero("Opcion: ", 0, 5);
+        if(error != ""){
+            escribirColor(ROJO, "\n" + error + "\n");
+        }
+
+        int opcion = leerOpcionUnDigito("Opcion: ", 0, 5);
+
+        if(opcion == -1){
+            error = "Opcion invalida. Solo puede elegir 0, 1, 2, 3, 4 o 5.";
+            continue;
+        }
+
+        error = "";
 
         switch(opcion){
             case 1:{
@@ -499,12 +541,24 @@ void modificarTarea(){
                 break;
             }
 
-            case 3:
-                tareas[indice].importancia = leerEntero("Nueva importancia [1-5]: ", 1, 5);
+            case 3:{
+                int nuevaImportancia;
+
+                do{
+                    nuevaImportancia = leerOpcionUnDigito("Nueva importancia [1-5]: ", 1, 5);
+
+                    if(nuevaImportancia == -1){
+                        escribirColor(ROJO, "\nImportancia invalida. Use un solo digito del 1 al 5.\n");
+                    }
+
+                }while(nuevaImportancia == -1);
+
+                tareas[indice].importancia = nuevaImportancia;
                 guardarTareas();
                 escribirColor(VERDE, "\nImportancia modificada correctamente.\n");
                 pausar();
                 break;
+            }
 
             case 4:{
                 std::string fecha;
@@ -547,27 +601,44 @@ void borrarTarea(){
         return;
     }
 
-    limpiarPantalla();
+    bool confirmado = false;
+    bool cancelar = false;
+    std::string error = "";
 
-    linea(0);
-    centrarTextoColor(ROJO, "BORRAR TAREA");
-    linea(1);
-    textoIzquierda("ID: " + std::to_string(tareas[indice].id));
-    textoIzquierda("Nombre: " + tareas[indice].nombre);
-    textoIzquierda("Descripcion: " + tareas[indice].descripcion);
-    linea(2);
+    do{
+        limpiarPantalla();
 
-    std::cout << "\nSeguro que desea borrar esta tarea? [S/N]: ";
+        linea(0);
+        centrarTextoColor(ROJO, "BORRAR TAREA");
+        linea(1);
+        textoIzquierda("ID: " + std::to_string(tareas[indice].id));
+        textoIzquierda("Nombre: " + tareas[indice].nombre);
+        textoIzquierda("Descripcion: " + tareas[indice].descripcion);
+        linea(2);
 
-    int tecla = _getch();
+        if(error != ""){
+            escribirColor(ROJO, "\n" + error + "\n");
+        }
 
-    if(tecla == 's' || tecla == 'S'){
+        char opcion = leerOpcionCaracter("\nSeguro que desea borrar esta tarea? [S/N]: ", "SN");
+
+        if(opcion == 'S'){
+            confirmado = true;
+        }else if(opcion == 'N'){
+            cancelar = true;
+        }else{
+            error = "Opcion invalida. Solo puede elegir S o N.";
+        }
+
+    }while(!confirmado && !cancelar);
+
+    if(confirmado){
         tareas.erase(tareas.begin() + indice);
         guardarTareas();
 
-        std::cout << "\n\nTarea borrada correctamente.\n";
+        std::cout << "\nTarea borrada correctamente.\n";
     }else{
-        std::cout << "\n\nOperacion cancelada.\n";
+        std::cout << "\nOperacion cancelada.\n";
     }
 
     pausar();

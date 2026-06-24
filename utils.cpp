@@ -41,6 +41,50 @@ int leerEntero(const std::string& mensaje, int minimo, int maximo){
     return valor;
 }
 
+int leerOpcionUnDigito(const std::string& mensaje, int minimo, int maximo){
+    int tecla;
+
+    std::cout << mensaje;
+    tecla = _getch();
+
+    if(tecla >= '0' && tecla <= '9'){
+        int valor = tecla - '0';
+
+        if(valor >= minimo && valor <= maximo){
+            std::cout << char(tecla) << std::endl;
+            return valor;
+        }
+    }
+
+    return -1;
+}
+
+char convertirAMayuscula(char letra){
+    if(letra >= 'a' && letra <= 'z'){
+        return char(letra - 32);
+    }
+
+    return letra;
+}
+
+char leerOpcionCaracter(const std::string& mensaje, const std::string& opcionesValidas){
+    int tecla;
+    char opcion;
+
+    std::cout << mensaje;
+    tecla = _getch();
+    opcion = convertirAMayuscula(char(tecla));
+
+    for(int i = 0; i < (int)opcionesValidas.length(); i++){
+        if(opcion == convertirAMayuscula(opcionesValidas[i])){
+            std::cout << opcion << std::endl;
+            return opcion;
+        }
+    }
+
+    return '\0';
+}
+
 std::string leerTexto(const std::string& mensaje){
     std::string texto;
 

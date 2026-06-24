@@ -179,8 +179,6 @@ void mostrarOpcionesVerTareas(){
     std::cout << "[2] Importancia   ";
     std::cout << "[3] Nombre   ";
     std::cout << "[4] Fecha entrega\n";
-
-    std::cout << "\nOpcion: ";
 }
 
 void mostrarFormularioAgregarTarea(const std::string& nombre, const std::string& descripcion,

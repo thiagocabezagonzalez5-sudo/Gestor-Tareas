@@ -80,7 +80,8 @@ void mostrarUsuariosPaginados(const std::vector<std::string>& usuarios, int pagi
         textoIzquierda("No hay usuarios creados.");
     }else{
         for(int i = inicio; i < fin; i++){
-            textoIzquierda("[" + std::to_string(i + 1) + "] " + usuarios[i]);
+            int numeroVisible = i - inicio + 1;
+            textoIzquierda("[" + std::to_string(numeroVisible) + "] " + usuarios[i]);
         }
     }
 
@@ -88,7 +89,6 @@ void mostrarUsuariosPaginados(const std::vector<std::string>& usuarios, int pagi
 
     std::cout << "\n[N] Siguiente pagina   [P] Pagina anterior";
     std::cout << "\n[C] Crear nuevo usuario   [0] Salir";
-    std::cout << "\n\nOpcion o numero de usuario: ";
 }
 
 void ingresarUsuario(){
@@ -97,6 +97,7 @@ void ingresarUsuario(){
     int paginaActual = 0;
     int usuariosPorPagina = 7;
     bool salir = false;
+    std::string error = "";
 
     do{
         limpiarPantalla();
@@ -116,24 +117,45 @@ void ingresarUsuario(){
             paginaActual = 0;
         }
 
+        int inicio = paginaActual * usuariosPorPagina;
+        int fin = inicio + usuariosPorPagina;
+
+        if(fin > totalUsuarios){
+            fin = totalUsuarios;
+        }
+
+        int cantidadVisible = fin - inicio;
+
         mostrarUsuariosPaginados(usuarios, paginaActual, usuariosPorPagina);
 
-        std::string entrada = leerTexto("");
+        if(error != ""){
+            escribirColor(ROJO, "\n" + error + "\n");
+        }
 
-        if(entrada == "n" || entrada == "N"){
+        std::cout << "\nOpcion o numero de usuario: ";
+        int tecla = _getch();
+
+        if(tecla == 'n' || tecla == 'N'){
             if(paginaActual < totalPaginas - 1){
                 paginaActual++;
+                error = "";
+            }else{
+                error = "Ya esta en la ultima pagina.";
             }
-        }else if(entrada == "p" || entrada == "P"){
+        }else if(tecla == 'p' || tecla == 'P'){
             if(paginaActual > 0){
                 paginaActual--;
+                error = "";
+            }else{
+                error = "Ya esta en la primera pagina.";
             }
-        }else if(entrada == "c" || entrada == "C"){
+        }else if(tecla == 'c' || tecla == 'C'){
+            std::cout << "C" << std::endl;
+
             std::string nombre = leerTexto("\nIngrese el nombre del nuevo usuario: ");
 
             if(nombre == ""){
-                escribirColor(ROJO, "\nEl nombre no puede estar vacio.\n");
-                pausar();
+                error = "El nombre no puede estar vacio.";
             }else{
                 usuarioActual = nombre;
                 crearCarpeta(nombre);
@@ -145,19 +167,18 @@ void ingresarUsuario(){
                 pausar();
                 salir = true;
             }
-        }else if(entrada == "0"){
+        }else if(tecla == '0'){
+            std::cout << "0" << std::endl;
             salir = true;
-        }else{
-            int numeroUsuario = 0;
+        }else if(tecla >= '1' && tecla <= '9'){
+            int numeroVisible = tecla - '0';
 
-            try{
-                numeroUsuario = std::stoi(entrada);
-            }catch(...){
-                numeroUsuario = 0;
-            }
+            if(numeroVisible >= 1 && numeroVisible <= cantidadVisible){
+                std::cout << char(tecla) << std::endl;
 
-            if(numeroUsuario >= 1 && numeroUsuario <= (int)usuarios.size()){
-                usuarioActual = usuarios[numeroUsuario - 1];
+                int indiceUsuario = inicio + numeroVisible - 1;
+
+                usuarioActual = usuarios[indiceUsuario];
                 archivoTareasGlobal = construirRutaArchivoTareas(usuarioActual);
                 cargarTareas();
 
@@ -167,23 +188,38 @@ void ingresarUsuario(){
                 pausar();
                 salir = true;
             }else{
-                escribirColor(ROJO, "\nOpcion invalida.\n");
-                pausar();
+                error = "Opcion invalida. Elija un usuario visible, N, P, C o 0.";
             }
+        }else{
+            error = "Opcion invalida. Elija un usuario visible, N, P, C o 0.";
         }
 
     }while(!salir);
 }
 
 int menuUsuario(){
-    limpiarPantalla();
+    std::string error = "";
 
-    linea(0);
-    centrarTexto("GESTOR DE TAREAS 6761 - MENU DE USUARIOS");
-    linea(1);
-    textoIzquierda("[1] Seleccionar o crear usuario.");
-    textoIzquierda("[0] Salir.");
-    linea(2);
+    while(true){
+        limpiarPantalla();
 
-    return leerEntero("Opcion: ", 0, 1);
+        linea(0);
+        centrarTexto("GESTOR DE TAREAS 6761 - MENU DE USUARIOS");
+        linea(1);
+        textoIzquierda("[1] Seleccionar o crear usuario.");
+        textoIzquierda("[0] Salir.");
+        linea(2);
+
+        if(error != ""){
+            escribirColor(ROJO, "\n" + error + "\n");
+        }
+
+        int opcion = leerOpcionUnDigito("Opcion: ", 0, 1);
+
+        if(opcion != -1){
+            return opcion;
+        }
+
+        error = "Opcion invalida. Solo puede elegir 1 o 0.";
+    }
 }
