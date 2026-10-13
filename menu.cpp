@@ -12,7 +12,7 @@ int mostrarMenu(){
         limpiarPantalla();
 
         linea(0);
-        centrarTexto("GESTOR DE TAREAS 6761");
+        centrarTexto("TASKMANAGER.cpp");
         linea(1);
         textoIzquierda("[1] Ver tareas.");
         textoIzquierda("[2] Agregar tarea.");

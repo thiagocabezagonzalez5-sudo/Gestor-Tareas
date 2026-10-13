@@ -1,7 +1,0 @@
-Como no vinieron los archivos .h, agrega estos prototipos en utils.h:
-
-int leerOpcionUnDigito(const std::string& mensaje, int minimo, int maximo);
-char leerOpcionCaracter(const std::string& mensaje, const std::string& opcionesValidas);
-
-No hace falta cambiar visual.h porque mostrarOpcionesVerTareas mantiene el mismo nombre y los mismos parametros.
-No hace falta cambiar tareas.h por las nuevas llamadas internas porque tareas.cpp ya incluye declaraciones adelantadas para seleccionarTareaPaginada y mostrarDetalleTarea.

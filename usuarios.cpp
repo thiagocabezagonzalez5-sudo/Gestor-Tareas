@@ -204,7 +204,7 @@ int menuUsuario(){
         limpiarPantalla();
 
         linea(0);
-        centrarTexto("GESTOR DE TAREAS 6761 - MENU DE USUARIOS");
+        centrarTexto("TASKMANAGER.cpp - MENU DE USUARIOS");
         linea(1);
         textoIzquierda("[1] Seleccionar o crear usuario.");
         textoIzquierda("[0] Salir.");

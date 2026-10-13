@@ -171,7 +171,7 @@ void mostrarTareasPaginadas(int paginaActual, int tareasPorPagina){
     }
 
     linea(0);
-    centrarTexto("GESTOR TAREAS 6761");
+    centrarTexto("TASKMANAGER.cpp");
     centrarTexto("Pagina " + std::to_string(paginaActual + 1) + " de " + std::to_string(totalPaginas));
     lineaTabla(1);
 
